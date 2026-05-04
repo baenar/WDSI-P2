@@ -15,7 +15,8 @@ class DynaQ:
         epsilon_min: float = 0.05,
         epsilon_decay: float = 0.995,
         episodes: int = 8000,
-        n_planning_steps: int = 10,
+        n_planning_steps_start: int = 0,
+        n_planning_steps_max: int = 10,
         seed: int | None = None,
     ):
         self.alpha = alpha
@@ -24,7 +25,8 @@ class DynaQ:
         self.epsilon_min = epsilon_min
         self.epsilon_decay = epsilon_decay
         self.episodes = episodes
-        self.n_planning_steps = n_planning_steps
+        self.n_planning_steps_start = n_planning_steps_start
+        self.n_planning_steps_max = n_planning_steps_max
         self.seed = seed
 
     def _epsilon_greedy(self, Q: np.ndarray, state: int, n_actions: int, epsilon: float) -> int:
@@ -37,11 +39,12 @@ class DynaQ:
         if self.seed is not None:
             random.seed(self.seed)
 
+        n_planning_steps = self.n_planning_steps_start
         epsilon = self.epsilon_start
         Q = np.zeros((env.num_states, env.nA))
         model = defaultdict(lambda: defaultdict(lambda: defaultdict(int)))
 
-        for _ in range(self.episodes):
+        for episode in range(self.episodes):
             state = env.reset()
             done = False
             while not done:
@@ -53,10 +56,10 @@ class DynaQ:
                 Q[state, action] += self.alpha * (td_target - Q[state, action])
 
                 # Store transition in model
-                model[state][action][(next_state, reward)] += 1
+                model[state][action][(next_state, reward, done)] += 1
 
                 # Planning: simulate n steps from the learned model
-                for _ in range(self.n_planning_steps):
+                for _ in range(n_planning_steps):
                     s_sim = random.choice(list(model.keys()))
                     a_sim = random.choice(list(model[s_sim].keys()))
 
@@ -66,14 +69,15 @@ class DynaQ:
                     total_occurrences = sum(counts)
                     probabilities = [count / total_occurrences for count in counts]
 
-                    chosen_index = np.random.choice(len(outcomes), p=probabilities)
-                    s_next_sim, r_sim = outcomes[chosen_index]
+                    chosen_outcome = random.choices(outcomes, weights=probabilities, k=1)[0]
+                    s_next_sim, r_sim, done_sim = chosen_outcome
 
-                    done_sim = env.is_terminal_state(s_next_sim)
                     td_sim = r_sim + self.gamma * np.max(Q[s_next_sim]) * (not done_sim)
                     Q[s_sim, a_sim] += self.alpha * (td_sim - Q[s_sim, a_sim])
 
                 state = next_state
+            if episode % 10 == 0:
+                n_planning_steps = min(n_planning_steps + 1, self.n_planning_steps_max)
             epsilon = max(self.epsilon_min, epsilon * self.epsilon_decay)
 
         return Q
