@@ -16,6 +16,7 @@ from env import SlipperyGridWorld
 from viz import (
     evaluate, plot_policy, plot_value_heatmap, run_to_gif, greedy_policy_from_V,
 )
+from vi import VIAlgorithm
 from qlearning import QLearning
 from sarsa import SARSA
 from dynaq import DynaQ
@@ -23,6 +24,13 @@ from dynaq import DynaQ
 # ─── Shared hyperparameters ──────────────────────────────────────────────────
 
 GAMMA = 0.99
+
+VI_PARAMS = dict(
+    max_iter=100,
+    gamma=GAMMA,
+    theta=1e-5,
+)
+
 SHARED_HYPERPARAMS = dict(
     alpha=0.2,
     gamma=GAMMA,
@@ -90,12 +98,14 @@ CONFIGS: dict[str, dict] = {
 # Each factory creates a fresh instance so epsilon always starts at epsilon_start.
 
 ALGORITHMS: dict[str, type] = {
+    "vi": VIAlgorithm,
     "qlearning": QLearning,
     "sarsa": SARSA,
     "dynaq": DynaQ,
 }
 
 ALGO_EXTRA_KWARGS: dict[str, dict] = {
+    "vi": {},
     "qlearning": {},
     "sarsa": {},
     "dynaq": {"n_planning_steps": 10},
@@ -112,13 +122,18 @@ def run_one(algo_name: str, config_name: str, env_extra: dict) -> dict:
     env = SlipperyGridWorld(**{**BASE_ENV, **env_extra})
 
     extra = ALGO_EXTRA_KWARGS[algo_name]
-    algo = ALGORITHMS[algo_name](**SHARED_HYPERPARAMS, **extra)
+    params = VI_PARAMS if algo_name == "vi" else {**SHARED_HYPERPARAMS, **extra}
+    algo = ALGORITHMS[algo_name](**params)
 
     print(f"    [{algo_name}] training...", end=" ", flush=True)
-    Q = algo.train(env)
+    Q = None
+    V = None
+    if algo_name == "vi":
+        V = algo.run(env)
+    else:
+        Q = algo.train(env)
+        V = np.max(Q, axis=1)
     print("done.", flush=True)
-
-    V = np.max(Q, axis=1)
     pi = greedy_policy_from_V(V, env, GAMMA)
 
     out_dir = os.path.join(RESULTS_ROOT, algo_name, config_name)
@@ -141,12 +156,19 @@ def run_one(algo_name: str, config_name: str, env_extra: dict) -> dict:
     env.reset()
     run_to_gif(
         env, Q=Q,
+        policy=pi if algo_name == "vi" else None,
         gif_path=os.path.join(out_dir, "episode.gif"),
         frames_dir=os.path.join(out_dir, "frames"),
         fps=6,
     )
 
-    metrics = evaluate(env, Q=Q, n_episodes=50, seed=9876)
+    metrics = evaluate(
+        env, Q=Q,
+        policy=pi if algo_name == "vi" else None,
+        n_episodes=50,
+        seed=9876
+    )
+
     with open(os.path.join(out_dir, "metrics.json"), "w") as f:
         json.dump(metrics, f, indent=2)
 

@@ -1,4 +1,5 @@
 from __future__ import annotations
+from collections import defaultdict
 import random
 import numpy as np
 
@@ -38,7 +39,7 @@ class DynaQ:
 
         epsilon = self.epsilon_start
         Q = np.zeros((env.num_states, env.nA))
-        model: dict[tuple[int, int], tuple[int, float]] = {}
+        model = defaultdict(lambda: defaultdict(lambda: defaultdict(int)))
 
         for _ in range(self.episodes):
             state = env.reset()
@@ -52,13 +53,22 @@ class DynaQ:
                 Q[state, action] += self.alpha * (td_target - Q[state, action])
 
                 # Store transition in model
-                model[(state, action)] = (next_state, reward)
+                model[state][action][(next_state, reward)] += 1
 
                 # Planning: simulate n steps from the learned model
-                visited = list(model.keys())
                 for _ in range(self.n_planning_steps):
-                    s_sim, a_sim = visited[random.randint(0, len(visited) - 1)]
-                    s_next_sim, r_sim = model[(s_sim, a_sim)]
+                    s_sim = random.choice(list(model.keys()))
+                    a_sim = random.choice(list(model[s_sim].keys()))
+
+                    outcomes = list(model[s_sim][a_sim].keys())
+                    counts = list(model[s_sim][a_sim].values())
+
+                    total_occurrences = sum(counts)
+                    probabilities = [count / total_occurrences for count in counts]
+
+                    chosen_index = np.random.choice(len(outcomes), p=probabilities)
+                    s_next_sim, r_sim = outcomes[chosen_index]
+
                     done_sim = env.is_terminal_state(s_next_sim)
                     td_sim = r_sim + self.gamma * np.max(Q[s_next_sim]) * (not done_sim)
                     Q[s_sim, a_sim] += self.alpha * (td_sim - Q[s_sim, a_sim])
