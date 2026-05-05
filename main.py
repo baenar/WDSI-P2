@@ -108,7 +108,7 @@ ALGO_EXTRA_KWARGS: dict[str, dict] = {
     "vi": {},
     "qlearning": {},
     "sarsa": {},
-    "dynaq": {"n_planning_steps_start": 0, "n_planning_steps_max": 10},
+    "dynaq": {"n_planning_steps": 10},
 }
 
 # ─── Results root ────────────────────────────────────────────────────────────
