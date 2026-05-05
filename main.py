@@ -44,14 +44,14 @@ SHARED_HYPERPARAMS = dict(
 # ─── Environment base config ─────────────────────────────────────────────────
 
 BASE_ENV = dict(
-    rows=5,
-    cols=7,
+    rows=30,
+    cols=30,
     start=(0, 0),
-    goal=(4, 6),
+    goal=(29, 29),
     slip_prob=0.2,
     step_reward=-1,
-    goal_reward=10,
-    max_steps=50,
+    goal_reward=100,
+    max_steps=100,
     seed=9876,
 )
 
@@ -59,39 +59,46 @@ BASE_ENV = dict(
 # Each entry extends BASE_ENV with additional kwargs.
 
 CONFIGS: dict[str, dict] = {
-    "config_0_base": {},
+    # "config_0_base": {},
+    #
+    # "config_1_obstacles": dict(
+    #     obstacles=[(1, 2), (2, 4), (3, 1)],
+    #     obstacle_penalty=-10.0,
+    #     obstacle_move_every=1,
+    # ),
 
-    "config_1_obstacles": dict(
-        obstacles=[(1, 2), (2, 4), (3, 1)],
-        obstacle_penalty=-10.0,
+    # "config_1b_corner_obstacles": dict(
+    #     corner_size=14,
+    #     corner_obstacle_count=10,
+    #     obstacle_penalty=-100.0,
+    #     obstacle_move_every=1,
+    # ),
+
+    "config_1c_one_corner_obstacles": dict(
+        corner_size=29,
+        corner_obstacle_count=30,
+        obstacle_penalty=-100.0,
         obstacle_move_every=1,
     ),
 
-    "config_1b_corner_obstacles": dict(
-        corner_size=2,
-        corner_obstacle_count=2,
-        obstacle_penalty=-10.0,
-        obstacle_move_every=1,
-    ),
-
-    "config_2_moving_goal": dict(
-        moving_goal=True,
-        goal_move_every=5,
-    ),
-
-    "config_3_multi_goal": dict(
-        goals=[(0, 6), (2, 3)],
-    ),
-
-    "config_4_all": dict(
-        corner_size=2,
-        corner_obstacle_count=2,
-        obstacle_penalty=-10.0,
-        obstacle_move_every=2,
-        moving_goal=True,
-        goal_move_every=8,
-        goals=[(0, 6)],
-    ),
+    # "config_2_moving_goal": dict(
+    #     moving_goal=True,
+    #     goal_move_every=5,
+    # ),
+    #
+    # "config_3_multi_goal": dict(
+    #     goals=[(0, 6), (2, 3)],
+    # ),
+    #
+    # "config_4_all": dict(
+    #     corner_size=2,
+    #     corner_obstacle_count=2,
+    #     obstacle_penalty=-10.0,
+    #     obstacle_move_every=2,
+    #     moving_goal=True,
+    #     goal_move_every=8,
+    #     goals=[(0, 6)],
+    # ),
 }
 
 # ─── Algorithm factories ─────────────────────────────────────────────────────

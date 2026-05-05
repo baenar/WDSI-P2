@@ -56,14 +56,16 @@ class SlipperyGridWorld:
         obstacles: Optional[List[Tuple[int, int]]] = None,
         obstacle_penalty: float = -10.0,
         obstacle_move_every: int = 1,
+        # --- Modification 1b: corner-constrained obstacles ---
+        corner_size: int = 0,
+        corner_no: int = 2,
+        corner_obstacle_count: int = 0,
         # --- Modification 2: moving goal ---
         moving_goal: bool = False,
         goal_move_every: int = 5,
         # --- Modification 3: multiple goals ---
         goals: Optional[List[Tuple[int, int]]] = None,
-        # --- Modification 4: corner-constrained obstacles ---
-        corner_size: int = 0,
-        corner_obstacle_count: int = 0,
+
     ):
         assert rows > 0 and cols > 0
         assert 0.0 <= slip_prob <= 1.0
@@ -100,6 +102,7 @@ class SlipperyGridWorld:
 
         # Modification 4: corner-constrained obstacles
         self.corner_size = corner_size
+        self.corner_no = corner_no
         self.corner_obstacle_count = corner_obstacle_count
         self._initial_bl_obstacles: List[Tuple[int, int]] = []
         self._initial_tr_obstacles: List[Tuple[int, int]] = []
@@ -188,7 +191,10 @@ class SlipperyGridWorld:
 
         n = self.corner_obstacle_count
         self._initial_bl_obstacles = self.rng.sample(bl_cells, min(n, len(bl_cells)))
-        self._initial_tr_obstacles = self.rng.sample(tr_cells, min(n, len(tr_cells)))
+        self._initial_tr_obstacles = (
+            self.rng.sample(tr_cells, min(n, len(tr_cells)))
+            if self.corner_no >= 2 else []
+        )
         self._bl_obstacles = list(self._initial_bl_obstacles)
         self._tr_obstacles = list(self._initial_tr_obstacles)
 
@@ -228,7 +234,8 @@ class SlipperyGridWorld:
             return new_positions
 
         self._bl_obstacles = _move_in_region(self._bl_obstacles, bl_region)
-        self._tr_obstacles = _move_in_region(self._tr_obstacles, tr_region)
+        if self.corner_no >= 2:
+            self._tr_obstacles = _move_in_region(self._tr_obstacles, tr_region)
 
     def _move_goal(self) -> None:
         """Move the primary goal one step in a random valid direction (or stay)."""

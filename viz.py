@@ -201,6 +201,7 @@ def render_episode_frames(
             current_goal = tuple(current_goal)
 
         fig, ax = _base_grid_figure(env)
+        fig.set_size_inches(8, 8)
         _draw_cell_overlays(ax, env, obstacles=obstacles, current_goal=current_goal)
 
         # Agent
@@ -218,7 +219,7 @@ def render_episode_frames(
             ax.set_title(f"t={t}  r={r:.2f}  done={done}")
 
         path = os.path.join(out_dir, f"{prefix}_{t:04d}.png")
-        fig.savefig(path, dpi=200, bbox_inches="tight")
+        fig.savefig(path, dpi=200)
         plt.close(fig)
         saved.append(path)
 
