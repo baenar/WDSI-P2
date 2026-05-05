@@ -44,14 +44,14 @@ SHARED_HYPERPARAMS = dict(
 # ─── Environment base config ─────────────────────────────────────────────────
 
 BASE_ENV = dict(
-    rows=5,
-    cols=7,
+    rows=16,
+    cols=16,
     start=(0, 0),
-    goal=(4, 6),
-    slip_prob=0.2,
+    goal=(15, 0),
+    slip_prob=0.05,
     step_reward=-1,
-    goal_reward=10,
-    max_steps=50,
+    goal_reward=55,
+    max_steps=150,
     seed=9876,
 )
 
@@ -59,38 +59,57 @@ BASE_ENV = dict(
 # Each entry extends BASE_ENV with additional kwargs.
 
 CONFIGS: dict[str, dict] = {
-    "config_0_base": {},
+    # "config_0_base": {},
 
-    "config_1_obstacles": dict(
-        obstacles=[(1, 2), (2, 4), (3, 1)],
-        obstacle_penalty=-10.0,
-        obstacle_move_every=1,
-    ),
+    # "config_1_obstacles": dict(
+    #     obstacles=[(1, 2), (2, 4), (3, 1)],
+    #     obstacle_penalty=-10.0,
+    #     obstacle_move_every=1,
+    # ),
 
-    "config_1b_corner_obstacles": dict(
-        corner_size=2,
-        corner_obstacle_count=2,
-        obstacle_penalty=-10.0,
-        obstacle_move_every=1,
-    ),
+    # "config_1b_corner_obstacles": dict(
+    #     corner_size=2,
+    #     corner_obstacle_count=2,
+    #     obstacle_penalty=-10.0,
+    #     obstacle_move_every=1,
+    # ),
 
-    "config_2_moving_goal": dict(
-        moving_goal=True,
-        goal_move_every=5,
-    ),
+    # "config_2_moving_goal": dict(
+    #     moving_goal=True,
+    #     goal_move_every=5,
+    # ),
 
-    "config_3_multi_goal": dict(
-        goals=[(0, 6), (2, 3)],
-    ),
+    # "config_3_multi_goal": dict(
+    #     goals=[(0, 6), (2, 3)],
+    # ),
 
-    "config_4_all": dict(
-        corner_size=2,
-        corner_obstacle_count=2,
-        obstacle_penalty=-10.0,
-        obstacle_move_every=2,
-        moving_goal=True,
-        goal_move_every=8,
-        goals=[(0, 6)],
+    # "config_4_all": dict(
+    #     corner_size=2,
+    #     corner_obstacle_count=2,
+    #     obstacle_penalty=-10.0,
+    #     obstacle_move_every=2,
+    #     moving_goal=True,
+    #     goal_move_every=8,
+    #     goals=[(0, 6)],
+    # ),
+
+    "config_3_maze": dict(
+       obstacles=list(set(
+            # THE VAULT (Top Right): A 2-tile thick reinforced bunker protecting Goal 1
+            [(r, 11) for r in range(0, 7)] +
+            [(r, 12) for r in range(0, 7)] +  
+            [(5, c) for c in range(13, 16)] + 
+            [(6, c) for c in range(13, 16)] + 
+
+            # THE SAFE MAZE: A winding switchback path leading to Goal 2
+            [(5, c) for c in range(0, 9)] +  
+            [(8, c) for c in range(3, 16)] + 
+            [(11, c) for c in range(0, 12)] +
+            [(13, c) for c in range(3, 16)]  
+        )),
+        obstacle_penalty=-25.0,
+        obstacle_move_every=BASE_ENV["max_steps"] + 1,
+        goals=[(0, 15)],
     ),
 }
 
@@ -108,7 +127,7 @@ ALGO_EXTRA_KWARGS: dict[str, dict] = {
     "vi": {},
     "qlearning": {},
     "sarsa": {},
-    "dynaq": {"n_planning_steps": 10},
+    "dynaq": {"n_planning_steps": 5},
 }
 
 # ─── Results root ────────────────────────────────────────────────────────────
@@ -154,13 +173,13 @@ def run_one(algo_name: str, config_name: str, env_extra: dict) -> dict:
     )
 
     env.reset()
-    run_to_gif(
-        env, Q=Q,
-        policy=pi if algo_name == "vi" else None,
-        gif_path=os.path.join(out_dir, "episode.gif"),
-        frames_dir=os.path.join(out_dir, "frames"),
-        fps=6,
-    )
+    # run_to_gif(
+    #     env, Q=Q,
+    #     policy=pi if algo_name == "vi" else None,
+    #     gif_path=os.path.join(out_dir, "episode.gif"),
+    #     frames_dir=os.path.join(out_dir, "frames"),
+    #     fps=6,
+    # )
 
     metrics = evaluate(
         env, Q=Q,
