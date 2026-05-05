@@ -173,13 +173,13 @@ def run_one(algo_name: str, config_name: str, env_extra: dict) -> dict:
     )
 
     env.reset()
-    # run_to_gif(
-    #     env, Q=Q,
-    #     policy=pi if algo_name == "vi" else None,
-    #     gif_path=os.path.join(out_dir, "episode.gif"),
-    #     frames_dir=os.path.join(out_dir, "frames"),
-    #     fps=6,
-    # )
+    run_to_gif(
+        env, Q=Q,
+        policy=pi if algo_name == "vi" else None,
+        gif_path=os.path.join(out_dir, "episode.gif"),
+        frames_dir=os.path.join(out_dir, "frames"),
+        fps=6,
+    )
 
     metrics = evaluate(
         env, Q=Q,
