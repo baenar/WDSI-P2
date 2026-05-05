@@ -79,12 +79,9 @@ CONFIGS: dict[str, dict] = {
         rows=15,
         cols=15,
         max_steps=250,
-        # BL (wiersze 9-14, kol 0-5): 1 ruchomy cel (primary) + 10 pułapek
         goal=(12, 2),
         moving_goal=True,
         goal_move_every=5,
-        # TR (wiersze 0-5, kol 9-14): 5 celów statycznych + 10 pułapek
-        # env obsługuje tylko 1 ruchomy cel; pozostałe 4 są statyczne
         goals=[(1, 13), (2, 12), (2, 13), (2, 14), (3, 13)],
         corner_size=6,
         corner_no=2,
