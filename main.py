@@ -59,53 +59,53 @@ BASE_ENV = dict(
 # Each entry extends BASE_ENV with additional kwargs.
 
 CONFIGS: dict[str, dict] = {
-    # "config_0_base": {},
 
-    # "config_1_obstacles": dict(
-    #     obstacles=[(1, 2), (2, 4), (3, 1)],
-    #     obstacle_penalty=-10.0,
-    #     obstacle_move_every=1,
-    # ),
+    "config_1b_corner_obstacles": dict(
+        corner_size=14,
+        corner_obstacle_count=10,
+        obstacle_penalty=-100.0,
+        obstacle_move_every=1,
+    ),
 
-    # "config_1b_corner_obstacles": dict(
-    #     corner_size=2,
-    #     corner_obstacle_count=2,
-    #     obstacle_penalty=-10.0,
-    #     obstacle_move_every=1,
-    # ),
+    "config_1c_one_corner_obstacles": dict(
+        corner_size=9,
+        corner_no=1,
+        corner_obstacle_count=15,
+        obstacle_penalty=-100.0,
+        obstacle_move_every=1,
+    ),
 
-    # "config_2_moving_goal": dict(
-    #     moving_goal=True,
-    #     goal_move_every=5,
-    # ),
-
-    # "config_3_multi_goal": dict(
-    #     goals=[(0, 6), (2, 3)],
-    # ),
-
-    # "config_4_all": dict(
-    #     corner_size=2,
-    #     corner_obstacle_count=2,
-    #     obstacle_penalty=-10.0,
-    #     obstacle_move_every=2,
-    #     moving_goal=True,
-    #     goal_move_every=8,
-    #     goals=[(0, 6)],
-    # ),
+    "config_2_split_targets": dict(
+        rows=15,
+        cols=15,
+        max_steps=250,
+        # BL (wiersze 9-14, kol 0-5): 1 ruchomy cel (primary) + 10 pułapek
+        goal=(12, 2),
+        moving_goal=True,
+        goal_move_every=5,
+        # TR (wiersze 0-5, kol 9-14): 5 celów statycznych + 10 pułapek
+        # env obsługuje tylko 1 ruchomy cel; pozostałe 4 są statyczne
+        goals=[(1, 13), (2, 12), (2, 13), (2, 14), (3, 13)],
+        corner_size=6,
+        corner_no=2,
+        corner_obstacle_count=10,
+        obstacle_penalty=-50.0,
+        obstacle_move_every=2,
+    ),
 
     "config_3_maze": dict(
-       obstacles=list(set(
+        obstacles=list(set(
             # THE VAULT (Top Right): A 2-tile thick reinforced bunker protecting Goal 1
             [(r, 11) for r in range(0, 7)] +
-            [(r, 12) for r in range(0, 7)] +  
-            [(5, c) for c in range(13, 16)] + 
-            [(6, c) for c in range(13, 16)] + 
+            [(r, 12) for r in range(0, 7)] +
+            [(5, c) for c in range(13, 16)] +
+            [(6, c) for c in range(13, 16)] +
 
             # THE SAFE MAZE: A winding switchback path leading to Goal 2
-            [(5, c) for c in range(0, 9)] +  
-            [(8, c) for c in range(3, 16)] + 
+            [(5, c) for c in range(0, 9)] +
+            [(8, c) for c in range(3, 16)] +
             [(11, c) for c in range(0, 12)] +
-            [(13, c) for c in range(3, 16)]  
+            [(13, c) for c in range(3, 16)]
         )),
         obstacle_penalty=-25.0,
         obstacle_move_every=BASE_ENV["max_steps"] + 1,
