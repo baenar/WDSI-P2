@@ -32,25 +32,26 @@ VI_PARAMS = dict(
 )
 
 SHARED_HYPERPARAMS = dict(
-    alpha=0.2,
+    alpha=0.15,
     gamma=GAMMA,
     epsilon_start=1.0,
     epsilon_min=0.05,
-    epsilon_decay=0.995,
-    episodes=8000,
+    epsilon_decay=0.9998,
+    episodes=20000,
     seed=9876,
 )
 
 # ─── Environment base config ─────────────────────────────────────────────────
 
 BASE_ENV = dict(
-    rows=30,
-    cols=30,
+    rows=10,
+    cols=10,
     start=(0, 0),
-    goal=(29, 29),
+    goal=(9, 9),
     slip_prob=0.2,
     step_reward=-1,
     goal_reward=100,
+    wall_penalty=-5,
     max_steps=100,
     seed=9876,
 )
@@ -74,12 +75,13 @@ CONFIGS: dict[str, dict] = {
     #     obstacle_move_every=1,
     # ),
 
-    "config_1c_one_corner_obstacles": dict(
-        corner_size=29,
-        corner_obstacle_count=30,
-        obstacle_penalty=-100.0,
-        obstacle_move_every=1,
-    ),
+    # "config_1c_one_corner_obstacles": dict(
+    #     corner_size=9,
+    #     corner_no=1,
+    #     corner_obstacle_count=15,
+    #     obstacle_penalty=-100.0,
+    #     obstacle_move_every=1,
+    # ),
 
     # "config_2_moving_goal": dict(
     #     moving_goal=True,
@@ -99,23 +101,41 @@ CONFIGS: dict[str, dict] = {
     #     goal_move_every=8,
     #     goals=[(0, 6)],
     # ),
+
+    "config_2_split_targets": dict(
+        rows=15,
+        cols=15,
+        max_steps=250,
+        # BL (wiersze 9-14, kol 0-5): 1 ruchomy cel (primary) + 10 pułapek
+        goal=(12, 2),
+        moving_goal=True,
+        goal_move_every=5,
+        # TR (wiersze 0-5, kol 9-14): 5 celów statycznych + 10 pułapek
+        # env obsługuje tylko 1 ruchomy cel; pozostałe 4 są statyczne
+        goals=[(1, 13), (2, 12), (2, 13), (2, 14), (3, 13)],
+        corner_size=6,
+        corner_no=2,
+        corner_obstacle_count=10,
+        obstacle_penalty=-50.0,
+        obstacle_move_every=2,
+    ),
 }
 
 # ─── Algorithm factories ─────────────────────────────────────────────────────
 # Each factory creates a fresh instance so epsilon always starts at epsilon_start.
 
 ALGORITHMS: dict[str, type] = {
-    "vi": VIAlgorithm,
+    # "vi": VIAlgorithm,
     "qlearning": QLearning,
     "sarsa": SARSA,
     "dynaq": DynaQ,
 }
 
 ALGO_EXTRA_KWARGS: dict[str, dict] = {
-    "vi": {},
+    # "vi": {},
     "qlearning": {},
     "sarsa": {},
-    "dynaq": {"n_planning_steps": 10},
+    "dynaq": {"n_planning_steps": 5},
 }
 
 # ─── Results root ────────────────────────────────────────────────────────────

@@ -50,6 +50,7 @@ class SlipperyGridWorld:
         slip_prob: float = 0.2,
         step_reward: float = -1.0,
         goal_reward: float = 10.0,
+        wall_penalty: float = 0.0,
         max_steps: Optional[int] = None,
         seed: Optional[int] = None,
         # --- Modification 1: moving obstacles ---
@@ -77,6 +78,7 @@ class SlipperyGridWorld:
         self.slip_prob = slip_prob
         self.step_reward = step_reward
         self.goal_reward = goal_reward
+        self.wall_penalty = wall_penalty
         self.max_steps = max_steps
 
         self.rng = random.Random(seed)
@@ -323,6 +325,7 @@ class SlipperyGridWorld:
 
         r, c = self._agent_row_column
         nr, nc = self._apply_action(r, c, executed)
+        hit_wall = (nr, nc) == (r, c)
         self._agent_row_column = (nr, nc)
 
         at_goal = self._agent_row_column in self._all_goals
@@ -337,6 +340,8 @@ class SlipperyGridWorld:
             reward = self.goal_reward
         else:
             reward = self.step_reward
+            if hit_wall:
+                reward += self.wall_penalty
             if on_obstacle:
                 reward += self.obstacle_penalty
 
@@ -386,6 +391,8 @@ class SlipperyGridWorld:
         if next_rc in self._all_goals:
             return self.goal_reward
         r = self.step_reward
+        if state == next_state:
+            r += self.wall_penalty
         all_obs = self._all_obstacle_positions()
         if all_obs and next_rc in set(all_obs):
             r += self.obstacle_penalty
